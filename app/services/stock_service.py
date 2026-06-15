@@ -1,4 +1,5 @@
 import yfinance as yf
+import pandas as pd
 
 
 def get_price_data(symbol: str, interval: str):
@@ -20,20 +21,27 @@ def get_price_data(symbol: str, interval: str):
     )
 
     if df.empty:
-        return df
+        print(f"データ取得失敗: {symbol} {interval}")
+        return pd.DataFrame()
+
+    # yfinanceで列がMultiIndexになる場合の対策
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = [col[0].lower() for col in df.columns]
+    else:
+        df.columns = [str(col).lower() for col in df.columns]
 
     df = df.reset_index()
 
-    df.columns = [str(c).lower().replace(" ", "_") for c in df.columns]
+    # 列名を小文字に統一
+    df.columns = [str(col).lower().replace(" ", "_") for col in df.columns]
 
-    rename_map = {
-        "open": "open",
-        "high": "high",
-        "low": "low",
-        "close": "close",
-        "volume": "volume",
-    }
+    # 必要な列があるか確認
+    required_columns = ["open", "high", "low", "close", "volume"]
 
-    df = df.rename(columns=rename_map)
+    for col in required_columns:
+        if col not in df.columns:
+            print("現在の列名:", df.columns.tolist())
+            print(f"必要な列がありません: {col}")
+            return pd.DataFrame()
 
     return df
