@@ -86,8 +86,11 @@ async def line_webhook(request: Request):
 def line_test():
     send_line_message("LINE通知テストです。")
     return {"message": "LINE通知テストを送信しました"}
+<<<<<<< HEAD
 
 @app.post("/line/test")
 def line_test():
     send_line_message("LINE通知テストです。")
     return {"message": "LINE通知テストを送信しました"}
+=======
+>>>>>>> 471b64ae5fce4f35ccd061717209906550ce26f7
