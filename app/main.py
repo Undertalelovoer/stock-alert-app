@@ -81,3 +81,8 @@ async def line_webhook(request: Request):
             send_line_message("株価通知の送信先として登録しました。")
 
     return {"status": "ok"}
+
+@app.post("/line/test")
+def line_test():
+    send_line_message("LINE通知テストです。")
+    return {"message": "LINE通知テストを送信しました"}
