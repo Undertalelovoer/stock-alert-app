@@ -57,8 +57,15 @@ async def add_watchlist(request: Request):
 
 @app.post("/check")
 def manual_check():
-    check_all_stocks()
-    return {"message": "手動チェックを実行しました"}
+    try:
+        check_all_stocks()
+        return {"message": "手動チェックを実行しました"}
+    except Exception as e:
+        print("CHECK ERROR:", repr(e))
+        return {
+            "message": "チェック中にエラーが発生しました",
+            "error": str(e)
+        }
 
 
 @app.post("/line/webhook")
