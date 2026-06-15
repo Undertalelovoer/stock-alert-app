@@ -18,30 +18,33 @@ def get_price_data(symbol: str, interval: str):
         interval=interval,
         progress=False,
         auto_adjust=False,
+        group_by="column",
     )
 
     if df.empty:
         print(f"データ取得失敗: {symbol} {interval}")
         return pd.DataFrame()
 
-    # yfinanceで列がMultiIndexになる場合の対策
+    print(f"取得直後の列名 {symbol} {interval}:", df.columns)
+
+    # yfinanceでMultiIndexになる場合の対策
     if isinstance(df.columns, pd.MultiIndex):
-        df.columns = [col[0].lower() for col in df.columns]
+        df.columns = [str(col[0]).lower().replace(" ", "_") for col in df.columns]
     else:
-        df.columns = [str(col).lower() for col in df.columns]
+        df.columns = [str(col).lower().replace(" ", "_") for col in df.columns]
 
     df = df.reset_index()
 
-    # 列名を小文字に統一
     df.columns = [str(col).lower().replace(" ", "_") for col in df.columns]
 
-    # 必要な列があるか確認
+    print(f"整形後の列名 {symbol} {interval}:", df.columns.tolist())
+
     required_columns = ["open", "high", "low", "close", "volume"]
 
     for col in required_columns:
         if col not in df.columns:
-            print("現在の列名:", df.columns.tolist())
             print(f"必要な列がありません: {col}")
+            print("現在の列名:", df.columns.tolist())
             return pd.DataFrame()
 
     return df
