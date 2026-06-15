@@ -1,0 +1,7 @@
+venv/
+.env
+__pycache__/
+*.pyc
+
+data/line_users.json
+data/last_notified.json

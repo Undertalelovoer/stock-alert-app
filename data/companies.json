@@ -1,0 +1,27 @@
+[
+  {
+    "name": "トヨタ自動車",
+    "symbol": "7203.T",
+    "market": "JP"
+  },
+  {
+    "name": "ソニーグループ",
+    "symbol": "6758.T",
+    "market": "JP"
+  },
+  {
+    "name": "ソフトバンクグループ",
+    "symbol": "9984.T",
+    "market": "JP"
+  },
+  {
+    "name": "Apple",
+    "symbol": "AAPL",
+    "market": "US"
+  },
+  {
+    "name": "Tesla",
+    "symbol": "TSLA",
+    "market": "US"
+  }
+]

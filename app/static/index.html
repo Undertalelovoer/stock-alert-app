@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>株価通知アプリ</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 28px;
+    }
+
+    select, button {
+      font-size: 18px;
+      padding: 10px;
+      margin: 8px 0;
+      width: 100%;
+    }
+
+    .card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 12px;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>株価通知アプリ</h1>
+
+  <h2>会社を選択</h2>
+  <select id="companySelect"></select>
+
+  <button onclick="addWatch()">監視開始</button>
+  <button onclick="manualCheck()">今すぐチェック</button>
+
+  <h2>監視中の会社</h2>
+  <div id="watchlist"></div>
+
+  <script>
+    let companies = [];
+
+    async function loadCompanies() {
+      const res = await fetch("/companies");
+      companies = await res.json();
+
+      const select = document.getElementById("companySelect");
+      select.innerHTML = "";
+
+      companies.forEach((company, index) => {
+        const option = document.createElement("option");
+        option.value = index;
+        option.textContent = `${company.name}（${company.symbol}）`;
+        select.appendChild(option);
+      });
+    }
+
+    async function loadWatchlist() {
+      const res = await fetch("/watchlist");
+      const watchlist = await res.json();
+
+      const area = document.getElementById("watchlist");
+      area.innerHTML = "";
+
+      watchlist.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "card";
+        div.textContent = `${item.name}（${item.symbol}）`;
+        area.appendChild(div);
+      });
+    }
+
+    async function addWatch() {
+      const index = document.getElementById("companySelect").value;
+      const company = companies[index];
+
+      const res = await fetch("/watchlist", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(company)
+      });
+
+      const result = await res.json();
+      alert(result.message);
+
+      loadWatchlist();
+    }
+
+    async function manualCheck() {
+      const res = await fetch("/check", {
+        method: "POST"
+      });
+
+      const result = await res.json();
+      alert(result.message);
+    }
+
+    loadCompanies();
+    loadWatchlist();
+  </script>
+</body>
+</html>
