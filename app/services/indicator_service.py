@@ -14,10 +14,19 @@ def calc_rci(series: pd.Series, period: int) -> pd.Series:
 
 def add_indicators(df: pd.DataFrame) -> pd.DataFrame:
     if df.empty:
-        return df
+        return pd.DataFrame()
+
+    required_columns = ["open", "high", "low", "close", "volume"]
+    missing = [col for col in required_columns if col not in df.columns]
+
+    if missing:
+        print("indicator_serviceで必要な列がありません:", missing)
+        print("現在の列名:", df.columns.tolist())
+        return pd.DataFrame()
 
     close = df["close"]
 
+    # 以下、元の処理を続ける
     df["ema5"] = close.ewm(span=5, adjust=False).mean()
     df["ema20"] = close.ewm(span=20, adjust=False).mean()
 
