@@ -4,15 +4,17 @@ from app.services.indicator_service import add_indicators
 def judge_buy_signal(df_1m, df_5m, df_1h, df_1d):
     reasons = []
 
-    if df_1m.empty or df_5m.empty or df_1h.empty or df_1d.empty:
-        return False, reasons
-
     df_1m = add_indicators(df_1m)
     df_5m = add_indicators(df_5m)
     df_1h = add_indicators(df_1h)
     df_1d = add_indicators(df_1d)
 
+    if df_1m.empty or df_5m.empty or df_1h.empty or df_1d.empty:
+        print("strategy_service: 指標計算後のデータが空です")
+        return False, reasons
+
     if len(df_1m) < 30 or len(df_5m) < 30 or len(df_1h) < 30 or len(df_1d) < 30:
+        print("strategy_service: データ件数が不足しています")
         return False, reasons
 
     latest_1m = df_1m.iloc[-1]

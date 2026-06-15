@@ -13,8 +13,13 @@ def calc_rci(series: pd.Series, period: int) -> pd.Series:
 
 
 def add_indicators(df: pd.DataFrame) -> pd.DataFrame:
-    if df.empty:
+    if df is None or df.empty:
+        print("indicator_service: dfが空です")
         return pd.DataFrame()
+
+    # 列名を小文字に統一
+    df = df.copy()
+    df.columns = [str(c).lower().replace(" ", "_") for c in df.columns]
 
     required_columns = ["open", "high", "low", "close", "volume"]
     missing = [col for col in required_columns if col not in df.columns]
@@ -24,22 +29,34 @@ def add_indicators(df: pd.DataFrame) -> pd.DataFrame:
         print("現在の列名:", df.columns.tolist())
         return pd.DataFrame()
 
+    for col in required_columns:
+        df[col] = pd.to_numeric(df[col], errors="coerce")
+
+    df = df.dropna(subset=["close"])
+
+    if df.empty:
+        print("indicator_service: closeがすべて空です")
+        return pd.DataFrame()
+
     close = df["close"]
 
-    # 以下、元の処理を続ける
+    # EMA
     df["ema5"] = close.ewm(span=5, adjust=False).mean()
     df["ema20"] = close.ewm(span=20, adjust=False).mean()
 
+    # ボリンジャーバンド
     df["bb_mid"] = close.rolling(20).mean()
     df["bb_std"] = close.rolling(20).std()
     df["bb_lower_2"] = df["bb_mid"] - 2 * df["bb_std"]
 
+    # MACD
     ema12 = close.ewm(span=12, adjust=False).mean()
     ema26 = close.ewm(span=26, adjust=False).mean()
     df["macd"] = ema12 - ema26
     df["macd_signal"] = df["macd"].ewm(span=9, adjust=False).mean()
     df["macd_hist"] = df["macd"] - df["macd_signal"]
 
+    # RSI 5
     diff = close.diff()
     gain = diff.clip(lower=0)
     loss = -diff.clip(upper=0)
@@ -50,12 +67,15 @@ def add_indicators(df: pd.DataFrame) -> pd.DataFrame:
 
     df["rsi5"] = 100 - (100 / (1 + rs))
 
+    # RCI
     df["rci5"] = calc_rci(close, 5)
     df["rci9"] = calc_rci(close, 9)
 
+    # VWAP
     typical_price = (df["high"] + df["low"] + df["close"]) / 3
     df["vwap"] = (typical_price * df["volume"]).cumsum() / df["volume"].cumsum()
 
+    # 出来高平均
     df["volume_avg20"] = df["volume"].rolling(20).mean()
 
     return df
